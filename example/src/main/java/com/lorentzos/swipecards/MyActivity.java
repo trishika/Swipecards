@@ -4,8 +4,11 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.lorentzos.flingswipe.SwipeFlingAdapterView;
@@ -19,12 +22,41 @@ import butterknife.OnClick;
 
 public class MyActivity extends Activity {
 
-    private ArrayList<String> al;
-    private ArrayAdapter<String> arrayAdapter;
+//    private ArrayList<String> al;
+//    private ArrayAdapter<String> arrayAdapter;
+
+    class ImageAdapter extends ArrayAdapter<Integer> {
+
+        private LayoutInflater mInflater;
+
+        public ImageAdapter(Context context, ArrayList<Integer> a) {
+            super(context, 0,  a);
+            mInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        }
+
+        public View getView(int position, View convertView, ViewGroup parent) {
+            View view;
+            ImageView image;
+
+            if (convertView == null) {
+                view = mInflater.inflate(R.layout.card, parent, false);
+            } else {
+                view = convertView;
+            }
+
+            image = (ImageView) view.findViewById(R.id.image);
+            image.setImageResource(getItem(position));
+
+            return view;
+        }
+    }
+
+    private ArrayList<Integer> al;
+    private ArrayAdapter<Integer> arrayAdapter;
+
     private int i;
 
     @InjectView(R.id.frame) SwipeFlingAdapterView flingContainer;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,19 +64,19 @@ public class MyActivity extends Activity {
         setContentView(R.layout.activity_my);
         ButterKnife.inject(this);
 
-
         al = new ArrayList<>();
-        al.add("php");
-        al.add("c");
-        al.add("python");
-        al.add("java");
-        al.add("html");
-        al.add("c++");
-        al.add("css");
-        al.add("javascript");
+        al.add(R.drawable.picture1);
+        al.add(R.drawable.picture2);
+        al.add(R.drawable.picture3);
+//        al.add("c");
+//        al.add("python");
+//        al.add("java");
+//        al.add("html");
+//        al.add("c++");
+//        al.add("css");
+//        al.add("javascript");
 
-        arrayAdapter = new ArrayAdapter<>(this, R.layout.item, R.id.helloText, al );
-
+        arrayAdapter = new ImageAdapter(this, al);
 
         flingContainer.setAdapter(arrayAdapter);
         flingContainer.setFlingListener(new SwipeFlingAdapterView.onFlingListener() {
@@ -52,8 +84,10 @@ public class MyActivity extends Activity {
             public void removeFirstObjectInAdapter() {
                 // this is the simplest way to delete an object from the Adapter (/AdapterView)
                 Log.d("LIST", "removed object!");
-                al.remove(0);
-                arrayAdapter.notifyDataSetChanged();
+                if(al.size()>0) {
+                    al.remove(0);
+                    arrayAdapter.notifyDataSetChanged();
+                }
             }
 
             @Override
@@ -72,7 +106,7 @@ public class MyActivity extends Activity {
             @Override
             public void onAdapterAboutToEmpty(int itemsInAdapter) {
                 // Ask for more data here
-                al.add("XML ".concat(String.valueOf(i)));
+//                al.add("XML ".concat(String.valueOf(i)));
                 arrayAdapter.notifyDataSetChanged();
                 Log.d("LIST", "notified");
                 i++;
@@ -81,8 +115,10 @@ public class MyActivity extends Activity {
             @Override
             public void onScroll(float scrollProgressPercent) {
                 View view = flingContainer.getSelectedView();
-                view.findViewById(R.id.item_swipe_right_indicator).setAlpha(scrollProgressPercent < 0 ? -scrollProgressPercent : 0);
-                view.findViewById(R.id.item_swipe_left_indicator).setAlpha(scrollProgressPercent > 0 ? scrollProgressPercent : 0);
+                if(view != null) {
+                    view.findViewById(R.id.item_swipe_right_indicator).setAlpha(scrollProgressPercent < 0 ? -scrollProgressPercent : 0);
+                    view.findViewById(R.id.item_swipe_left_indicator).setAlpha(scrollProgressPercent > 0 ? scrollProgressPercent : 0);
+                }
             }
         });
 
@@ -114,8 +150,6 @@ public class MyActivity extends Activity {
     public void left() {
         flingContainer.getTopCardListener().selectLeft();
     }
-
-
 
 
 }
